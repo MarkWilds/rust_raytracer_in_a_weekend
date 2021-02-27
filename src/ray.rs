@@ -19,13 +19,17 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn hit_sphere(&self, center: &Vec3, radius: f32) -> bool {
+    pub fn hit_sphere(&self, center: &Vec3, radius: f32) -> f32 {
         let oc = self.origin - *center;
 
         let a = self.direction.length_squared();
         let b = 2.0 * oc.dot(&self.direction);
         let c = oc.length_squared() - radius * radius;
         let disc = b * b - 4.0 * a * c;
-        disc > 0.0
+        if disc < 0.0 {
+            -1.0
+        } else {
+            (-b - f32::sqrt(disc)) / (2.0 * a)
+        }
     }
 }
