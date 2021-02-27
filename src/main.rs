@@ -15,6 +15,11 @@ fn write_pixel(color: &Vec3) {
 }
 
 fn ray_color(ray: &Ray) -> Vec3 {
+    let center = Vec3::new_filled(0.0, 0.0, -1.0);
+    if ray.hit_sphere(&center, 0.5) {
+        return Vec3::new_filled(255.0, 0.0, 0.0)
+    }
+
     let norm = ray.direction.normalize();
     let t = norm.y * 0.5_f32 + 1.0_f32;
     let color = Vec3::new_filled(1.0, 1.0, 1.0) * (1.0_f32 - t) + Vec3::new_filled(0.5, 0.7, 1.0) * t;
