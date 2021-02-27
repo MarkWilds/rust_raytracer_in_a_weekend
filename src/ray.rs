@@ -23,13 +23,13 @@ impl Ray {
         let oc = self.origin - *center;
 
         let a = self.direction.length_squared();
-        let b = 2.0 * oc.dot(&self.direction);
+        let half_b = oc.dot(&self.direction);
         let c = oc.length_squared() - radius * radius;
-        let disc = b * b - 4.0 * a * c;
+        let disc = half_b * half_b - a * c;
         if disc < 0.0 {
             -1.0
         } else {
-            (-b - f32::sqrt(disc)) / (2.0 * a)
+            (-half_b - f32::sqrt(disc)) / a
         }
     }
 }
