@@ -14,6 +14,10 @@ impl Vec3 {
         Vec3 {x: 0_f32, y: 0_f32, z: 0_f32}
     }
 
+    pub fn one() -> Vec3 {
+        Vec3 {x: 1_f32, y: 1_f32, z: 1_f32}
+    }
+
     pub fn new_filled(x: f32, y: f32, z: f32) -> Vec3 {
         Vec3 {x, y, z}
     }

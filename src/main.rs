@@ -21,26 +21,29 @@ fn write_pixel(color: &Vec3) {
 
 fn get_ray_color(ray: &Ray, objects: &Vec<Box<dyn Hittable>>) -> Vec3 {
     let mut hit = HitRecord::new_zero();
-    let mut temp_hit = HitRecord::new_zero();
-    temp_hit.t = f32::MAX;
+    if hit_world(objects, ray, &mut hit) {
+        let n = hit.n;
+        return (Vec3::new_filled(n.x, n.y, n.z) + Vec3::one()) * 0.5 * 255.0
+    }
+
+    let norm = ray.direction.normalize();
+    let t = 0.5 * (norm.y + 1.0);
+    let color = Vec3::one() * (1.0_f32 - t) + Vec3::new_filled(0.5, 0.7, 1.0) * t;
+    color * 255.0
+}
+
+fn hit_world(objects: &Vec<Box<dyn Hittable>>, ray: &Ray, hit: &mut HitRecord) -> bool {
+    let mut hit_anything = false;
+    let mut closest_so_far = f32::MAX;
 
     for object in objects {
-        if object.hit(ray, 0.0, temp_hit.t, &mut hit) {
-            if  hit.t < temp_hit.t {
-                temp_hit = hit;
-            }
+        if object.hit(ray, 0.0, closest_so_far, hit) {
+            hit_anything = true;
+            closest_so_far = hit.t;
         }
     }
 
-    if temp_hit.t == f32::MAX || temp_hit.t < 0.0 {
-        let norm = ray.direction.normalize();
-        let t = 0.5 * (norm.y + 1.0);
-        let color = Vec3::new_filled(1.0, 1.0, 1.0) * (1.0_f32 - t) + Vec3::new_filled(0.5, 0.7, 1.0) * t;
-        return color * 255.0
-    }
-
-    let n = temp_hit.n;
-    Vec3::new_filled(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5 * 255.0
+    hit_anything
 }
 
 fn main() {
@@ -57,8 +60,9 @@ fn main() {
     let vertical = Vec3::new_filled(0.0, viewport_height ,0.0);
     let lower_left_corner = origin - horizontal * 0.5 - vertical * 0.5 - Vec3::new_filled(0.0, 0.0, focal_point);
 
-    let objects: Vec<Box<dyn Hittable>> = vec![
-        Box::new(Sphere::new(Vec3::new_filled(0.0, 0.0, -1.0).borrow(), 0.5))
+    let world: Vec<Box<dyn Hittable>> = vec![
+        Box::new(Sphere::new(Vec3::new_filled(0.0, 0.0, -1.0).borrow(), 0.5)),
+        Box::new(Sphere::new(Vec3::new_filled(0.0, -100.5, -1.0).borrow(), 100.0))
     ];
 
     write_header(image_width, image_height);
@@ -70,7 +74,7 @@ fn main() {
             let dir = lower_left_corner + horizontal * u + vertical * v - origin;
             let ray = Ray::new_filled(origin, dir);
 
-            let color = get_ray_color(&ray, &objects);
+            let color = get_ray_color(&ray, &world);
             write_pixel(&color);
         }
     }
