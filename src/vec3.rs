@@ -85,6 +85,14 @@ impl ops::SubAssign<Vec3> for Vec3 {
     }
 }
 
+impl ops::Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Self::Output {
+        Vec3 {x: -self.x, y: -self.y, z: -self.z}
+    }
+}
+
 impl ops::Mul<f32> for Vec3 {
     type Output = Vec3;
 
