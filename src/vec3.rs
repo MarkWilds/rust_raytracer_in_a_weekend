@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fmt::Write;
 use std::ops;
+use rand::{thread_rng, Rng};
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -16,6 +17,21 @@ impl Vec3 {
 
     pub fn one() -> Vec3 {
         Vec3 {x: 1_f32, y: 1_f32, z: 1_f32}
+    }
+
+    pub fn random() -> Vec3 {
+        Vec3 {x: thread_rng().gen(), y: thread_rng().gen(), z: thread_rng().gen()}
+    }
+
+    pub fn near_zero(&self) -> bool {
+        f32::abs(self.x) < f32::EPSILON && f32::abs(self.y) < f32::EPSILON && f32::abs(self.z) < f32::EPSILON
+    }
+
+    pub fn random_min_max(min: f32, max: f32) -> Vec3 {
+        Vec3 {
+            x: thread_rng().gen_range(min..max),
+            y: thread_rng().gen_range(min..max),
+            z: thread_rng().gen_range(min..max)}
     }
 
     pub fn new_filled(x: f32, y: f32, z: f32) -> Vec3 {
@@ -110,5 +126,13 @@ impl ops::MulAssign<f32> for Vec3 {
         self.x = self.x * rhs;
         self.y = self.y * rhs;
         self.z = self.z * rhs;
+    }
+}
+
+impl ops::Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3::new_filled(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }

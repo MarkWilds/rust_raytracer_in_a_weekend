@@ -1,19 +1,22 @@
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use crate::material::Material;
+use std::rc::Rc;
 
-#[derive(Clone, Copy)]
 pub struct HitRecord {
     pub p: Vec3,
     pub n: Vec3,
+    pub material_ref: Rc<dyn Material>,
     pub t: f32,
     pub front_face: bool
 }
 
 impl HitRecord {
-    pub fn new_zero() -> HitRecord {
+    pub fn new_zero(mat: Rc<dyn Material>) -> HitRecord {
         HitRecord {
             p: Vec3::new(),
             n: Vec3::new(),
+            material_ref: mat,
             t: 0.0,
             front_face: true
         }
