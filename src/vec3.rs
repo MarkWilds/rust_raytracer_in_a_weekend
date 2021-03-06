@@ -12,30 +12,38 @@ pub struct Vec3 {
 
 impl Vec3 {
     pub fn new() -> Vec3 {
-        Vec3 {x: 0_f32, y: 0_f32, z: 0_f32}
+        Vec3 { x: 0_f32, y: 0_f32, z: 0_f32 }
     }
 
     pub fn one() -> Vec3 {
-        Vec3 {x: 1_f32, y: 1_f32, z: 1_f32}
+        Vec3 { x: 1_f32, y: 1_f32, z: 1_f32 }
     }
 
     pub fn random() -> Vec3 {
-        Vec3 {x: thread_rng().gen(), y: thread_rng().gen(), z: thread_rng().gen()}
+        Vec3 { x: thread_rng().gen(), y: thread_rng().gen(), z: thread_rng().gen() }
     }
 
     pub fn random_min_max(min: f32, max: f32) -> Vec3 {
         Vec3 {
             x: thread_rng().gen_range(min..max),
             y: thread_rng().gen_range(min..max),
-            z: thread_rng().gen_range(min..max)}
+            z: thread_rng().gen_range(min..max),
+        }
     }
 
     pub fn new_filled(x: f32, y: f32, z: f32) -> Vec3 {
-        Vec3 {x, y, z}
+        Vec3 { x, y, z }
     }
 
     pub fn reflect(lhs: &Vec3, rhs: &Vec3) -> Vec3 {
         *lhs - *rhs * 2f32 * lhs.dot(rhs)
+    }
+
+    pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f32) -> Vec3 {
+        let cos_theta = f32::min(-uv.dot(n), 1.0);
+        let r_out_perp = (*uv + (*n * cos_theta)) * etai_over_etat;
+        let r_out_parallel = *n * -f32::sqrt(f32::abs(1.0 - r_out_perp.length_squared()));
+        r_out_perp + r_out_parallel
     }
 
     pub fn near_zero(&self) -> bool {
@@ -113,7 +121,7 @@ impl ops::Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Self::Output {
-        Vec3 {x: -self.x, y: -self.y, z: -self.z}
+        Vec3 { x: -self.x, y: -self.y, z: -self.z }
     }
 }
 
