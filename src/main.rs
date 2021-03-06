@@ -77,7 +77,12 @@ fn main() {
     let image_width = 400_u16;
     let image_height = (image_width as f32 / aspect_ratio) as u16;
 
-    let camera = Camera::new(aspect_ratio);
+    let lookfrom = Vec3::new_filled(3.0,3.0,2.0);
+    let lookat = Vec3::new_filled(0.0,0.0,-1.0);
+    let vup = Vec3::new_filled(0.0,1.0,0.0);
+    let camera = Camera::new(lookfrom, lookat, vup, 90.0,
+                             aspect_ratio, 2.0,
+                             (lookfrom - lookat).length());
 
     let default_material = Rc::new(Lambertian {albedo: Vec3::new_filled(0.8, 0.8, 0.0)});
     let center_material = Rc::new(Lambertian {albedo: Vec3::new_filled(0.1, 0.2, 0.5)});

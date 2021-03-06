@@ -58,3 +58,11 @@ pub fn random_in_unit_sphere() -> Vec3 {
         if s.length_squared() < 1.0 {return s;}
     }
 }
+
+pub fn random_in_unit_disk() -> Vec3 {
+    loop {
+        let mut s = Vec3::random_min_max(-1.0, 1.0);
+        s.z = 0.0;
+        if s.length_squared() < 1.0 {return s;}
+    }
+}
