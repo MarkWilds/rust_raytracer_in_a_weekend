@@ -23,10 +23,6 @@ impl Vec3 {
         Vec3 {x: thread_rng().gen(), y: thread_rng().gen(), z: thread_rng().gen()}
     }
 
-    pub fn near_zero(&self) -> bool {
-        f32::abs(self.x) < f32::EPSILON && f32::abs(self.y) < f32::EPSILON && f32::abs(self.z) < f32::EPSILON
-    }
-
     pub fn random_min_max(min: f32, max: f32) -> Vec3 {
         Vec3 {
             x: thread_rng().gen_range(min..max),
@@ -36,6 +32,14 @@ impl Vec3 {
 
     pub fn new_filled(x: f32, y: f32, z: f32) -> Vec3 {
         Vec3 {x, y, z}
+    }
+
+    pub fn reflect(lhs: &Vec3, rhs: &Vec3) -> Vec3 {
+        *lhs - *rhs * 2f32 * lhs.dot(rhs)
+    }
+
+    pub fn near_zero(&self) -> bool {
+        f32::abs(self.x) < f32::EPSILON && f32::abs(self.y) < f32::EPSILON && f32::abs(self.z) < f32::EPSILON
     }
 
     pub fn length_squared(&self) -> f32 {

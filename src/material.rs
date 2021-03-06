@@ -29,6 +29,22 @@ impl Material for Lambertian {
     }
 }
 
+pub struct Metal {
+    pub albedo: Vec3
+}
+
+impl Material for Metal {
+    fn scatter(&self, ray_in: &Ray, hit: &HitRecord, color: &mut Vec3, scattered_ray: &mut Ray) -> bool {
+        scattered_ray.origin = hit.p;
+        scattered_ray.direction = Vec3::reflect(&ray_in.direction.normalize(), &hit.n);
+        color.x = self.albedo.x;
+        color.y = self.albedo.y;
+        color.z = self.albedo.z;
+
+        scattered_ray.direction.dot(&hit.n) > 0f32
+    }
+}
+
 pub struct DummyMaterial {}
 
 impl Material for DummyMaterial {

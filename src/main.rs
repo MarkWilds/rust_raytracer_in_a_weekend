@@ -12,7 +12,7 @@ use crate::camera::Camera;
 use crate::hittable::{Hittable, HitRecord};
 use std::borrow::Borrow;
 use rand::Rng;
-use crate::material::{Lambertian, DummyMaterial};
+use crate::material::{Lambertian, DummyMaterial, Metal};
 use std::rc::Rc;
 
 fn write_header(w: u16, h: u16) {
@@ -81,10 +81,14 @@ fn main() {
 
     let default_material = Rc::new(Lambertian {albedo: Vec3::new_filled(0.8, 0.8, 0.0)});
     let center_material = Rc::new(Lambertian {albedo: Vec3::new_filled(0.7, 0.3, 0.3)});
+    let mat_left = Rc::new(Metal {albedo: Vec3::new_filled(0.8, 0.8, 0.8)});
+    let mat_right = Rc::new(Metal {albedo: Vec3::new_filled(0.8, 0.6, 0.2)});
 
     let world: Vec<Box<dyn Hittable>> = vec![
+        Box::new(Sphere::new(Vec3::new_filled(0.0, -100.5, -1.0).borrow(), 100.0, default_material.clone())),
         Box::new(Sphere::new(Vec3::new_filled(0.0, 0.0, -1.0).borrow(), 0.5, center_material.clone())),
-        Box::new(Sphere::new(Vec3::new_filled(0.0, -100.5, -1.0).borrow(), 100.0, default_material.clone()))
+        Box::new(Sphere::new(Vec3::new_filled(-1.0, 0.0, -1.0).borrow(), 0.5, mat_left.clone())),
+        Box::new(Sphere::new(Vec3::new_filled(1.0, 0.0, -1.0).borrow(), 0.5, mat_right.clone()))
     ];
 
     write_header(image_width, image_height);
