@@ -11,9 +11,9 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(p: &Vec3, r: f32, material: Rc<dyn Material>) -> Sphere {
+    pub fn new(p: Vec3, r: f32, material: Rc<dyn Material>) -> Sphere {
         Sphere {
-            p: *p,
+            p,
             r,
             material_ref: material
         }

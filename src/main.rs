@@ -11,7 +11,7 @@ use crate::sphere::*;
 use crate::camera::Camera;
 use crate::hittable::{Hittable, HitRecord};
 use std::borrow::Borrow;
-use rand::Rng;
+use rand::{Rng, thread_rng};
 use crate::material::{Lambertian, DummyMaterial, Metal, Dielectric};
 use std::rc::Rc;
 
@@ -21,7 +21,7 @@ fn write_header(w: u16, h: u16) {
     println!("255");
 }
 
-fn write_pixel(unit_color: &Vec3, samples_per_pixel: u8) {
+fn write_pixel(unit_color: &Vec3, samples_per_pixel: u16) {
     let r= f32::sqrt(unit_color.x * (1.0 / samples_per_pixel as f32));
     let g= f32::sqrt(unit_color.y * (1.0 / samples_per_pixel as f32));
     let b= f32::sqrt(unit_color.z * (1.0 / samples_per_pixel as f32));
@@ -70,32 +70,60 @@ fn hit_world(objects: &Vec<Box<dyn Hittable>>, ray: &Ray, hit: &mut HitRecord) -
     hit_anything
 }
 
+fn create_scene(objects: &mut Vec<Box<dyn Hittable>>) {
+    let ground_mat = Rc::new(Lambertian {albedo: Vec3::new_filled(0.5, 0.5, 0.5)});
+    objects.push(Box::new(Sphere::new(Vec3::new_filled(0.0, -1000.0,0.0), 1000.0, ground_mat.clone())));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = thread_rng().gen_range(0.0..1.0);
+            let center = Vec3::new_filled(a as f32 + 0.9 * thread_rng().gen_range(0.0..1.0),
+            0.2,
+            b as f32 + 0.9 * thread_rng().gen_range(0.0..1.0));
+
+            if (center - Vec3::new_filled(4.0, 0.2, 0.0)).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    let color = Vec3::random() * Vec3::random();
+                    let mat = Rc::new(Lambertian {albedo: color});
+                    objects.push(Box::new(Sphere::new(center, 0.2, mat.clone())));
+                } else if choose_mat < 0.5 {
+                    let color = Vec3::random_min_max(0.5, 1.0);
+                    let fuzz = thread_rng().gen_range(0.0..0.5);
+                    let mat = Rc::new(Metal {albedo: color, fuzz });
+                    objects.push(Box::new(Sphere::new(center, 0.2, mat.clone())));
+                } else {
+                    let mat = Rc::new(Dielectric{ir: 1.5});
+                    objects.push(Box::new(Sphere::new(center, 0.2, mat.clone())));
+                }
+            }
+        }
+    }
+
+    let mat1 = Rc::new(Dielectric{ir: 1.5});
+    objects.push(Box::new(Sphere::new(Vec3::new_filled(0.0, 1.0,0.0), 1.0, mat1.clone())));
+
+    let mat2 = Rc::new(Lambertian {albedo: Vec3::new_filled(0.4, 0.2, 0.1)});
+    objects.push(Box::new(Sphere::new(Vec3::new_filled(-4.0, 1.0,0.0), 1.0, mat2.clone())));
+
+    let mat3 = Rc::new(Metal {albedo: Vec3::new_filled(0.7, 0.6, 0.5), fuzz: 0.0});
+    objects.push(Box::new(Sphere::new(Vec3::new_filled(4.0, 1.0,0.0), 1.0, mat3.clone())));
+}
+
 fn main() {
     let max_depth = 50;
-    let samples_per_pixel = 50_u8;
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400_u16;
+    let samples_per_pixel = 500_u16;
+    let aspect_ratio = 3.0 / 2.0;
+    let image_width = 1200_u16;
     let image_height = (image_width as f32 / aspect_ratio) as u16;
 
-    let lookfrom = Vec3::new_filled(3.0,3.0,2.0);
-    let lookat = Vec3::new_filled(0.0,0.0,-1.0);
+    let lookfrom = Vec3::new_filled(13.0,2.0,3.0);
+    let lookat = Vec3::new_filled(0.0,0.0,0.0);
     let vup = Vec3::new_filled(0.0,1.0,0.0);
     let camera = Camera::new(lookfrom, lookat, vup, 90.0,
-                             aspect_ratio, 2.0,
-                             (lookfrom - lookat).length());
+                             aspect_ratio, 0.1, 10.0);
 
-    let default_material = Rc::new(Lambertian {albedo: Vec3::new_filled(0.8, 0.8, 0.0)});
-    let center_material = Rc::new(Lambertian {albedo: Vec3::new_filled(0.1, 0.2, 0.5)});
-    let mat_left = Rc::new(Dielectric{ir: 1.5});
-    let mat_right = Rc::new(Metal {albedo: Vec3::new_filled(0.8, 0.6, 0.2), fuzz: 0.0});
-
-    let world: Vec<Box<dyn Hittable>> = vec![
-        Box::new(Sphere::new(Vec3::new_filled(0.0, -100.5, -1.0).borrow(), 100.0, default_material.clone())),
-        Box::new(Sphere::new(Vec3::new_filled(0.0, 0.0, -1.0).borrow(), 0.5, center_material.clone())),
-        Box::new(Sphere::new(Vec3::new_filled(-1.0, 0.0, -1.0).borrow(), 0.5, mat_left.clone())),
-        Box::new(Sphere::new(Vec3::new_filled(-1.0, 0.0, -1.0).borrow(), -0.4, mat_left.clone())),
-        Box::new(Sphere::new(Vec3::new_filled(1.0, 0.0, -1.0).borrow(), 0.5, mat_right.clone()))
-    ];
+    let mut world: Vec<Box<dyn Hittable>> = Vec::new();
+    create_scene(&mut world);
 
     write_header(image_width, image_height);
     for y in (0..image_height).rev() {
